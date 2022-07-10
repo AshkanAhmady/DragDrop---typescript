@@ -22,16 +22,46 @@ class ProjectInput{
         this.formElement.id = "user-input";
         // select inputs from (formElement)
         this.titleInpurElement = this.formElement.querySelector("#title") as HTMLInputElement;
-        this.descriptionInputElement = this.formElement.querySelector("#decription") as HTMLInputElement;
+        this.descriptionInputElement = this.formElement.querySelector("#description") as HTMLInputElement;
         this.peopleInputElement = this.formElement.querySelector("#people") as HTMLInputElement;
 
         this.configure();
         this.attach();
     }
 
-    private submitHandler = (e: Event) => {
+    // type of this method is (tuple OR void)
+    private gatherUserInput = (): [string,string, number] | void => {
+        const enteredTitle = this.titleInpurElement.value;
+        const enteredDescription = this.descriptionInputElement.value;
+        const enteredPeople = this.peopleInputElement.value;
+        
+        if (
+            enteredTitle.trim().length === 0 || 
+            enteredDescription.trim().length === 0 || 
+            enteredPeople.trim().length === 0
+        ) {
+           alert("input is invalid, please try again!");
+           return;     
+        } else {
+            return [enteredTitle, enteredDescription, +enteredPeople]
+        }
+    }
+
+    private submitHandler = (e: Event) =>  {
         e.preventDefault();
-        console.log(this.titleInpurElement.value)
+        const userInput = this.gatherUserInput();
+        // check for tuple => tuple is an array
+        if(Array.isArray(userInput)) {
+            const [title,description, people] = userInput;
+            console.log(title, description, people);
+            this.cleareInput()
+        }
+    }
+
+    private cleareInput() {
+        this.titleInpurElement.value = ""
+        this.descriptionInputElement.value = ""
+        this.peopleInputElement.value = ""
     }
 
     // do things when we (submit) form
