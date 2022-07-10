@@ -3,6 +3,9 @@ class ProjectInput{
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
     formElement: HTMLFormElement;
+    titleInpurElement: HTMLInputElement;
+    descriptionInputElement: HTMLInputElement;
+    peopleInputElement: HTMLInputElement;
 
     constructor() {
         //  ! => for say to typescript, this EL is not null
@@ -16,7 +19,28 @@ class ProjectInput{
             this.templateElement.content, true
         );
         this.formElement = importedNode.firstElementChild as HTMLFormElement;
-        // attach (form) to (app) 
+        this.formElement.id = "user-input";
+        // select inputs from (formElement)
+        this.titleInpurElement = this.formElement.querySelector("#title") as HTMLInputElement;
+        this.descriptionInputElement = this.formElement.querySelector("#decription") as HTMLInputElement;
+        this.peopleInputElement = this.formElement.querySelector("#people") as HTMLInputElement;
+
+        this.configure();
+        this.attach();
+    }
+
+    private submitHandler = (e: Event) => {
+        e.preventDefault();
+        console.log(this.titleInpurElement.value)
+    }
+
+    // do things when we (submit) form
+    private configure = () => {
+        this.formElement.addEventListener("submit",this.submitHandler)        
+    }
+    
+    // attach (form) to (app) 
+    private attach = () => {
         this.hostElement.insertAdjacentElement("afterbegin",this.formElement)
     }
 
