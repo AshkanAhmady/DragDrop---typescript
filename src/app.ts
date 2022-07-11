@@ -31,6 +31,43 @@ function validate(validatableInput: Validatable) {
     return isValid;
 }
 
+// task of this class: => import list of projects to (app)
+class ProjectList{
+    templateElement: HTMLTemplateElement;
+    hostElement: HTMLDivElement;
+    sectionElement: HTMLElement;
+
+    // we can also define (type) like this
+    // private type = "active" | "finished"
+    constructor(private type: "active" | "finished") {
+        this.templateElement = document.getElementById("project-list")! as HTMLTemplateElement;
+        this.hostElement = document.getElementById("app")! as HTMLDivElement;
+        // get form inside of (template element)
+        const importedNode = document.importNode(
+            // this content is the form
+            // true => for deep copy of nested elements
+            this.templateElement.content, true
+        );
+        this.sectionElement = importedNode.firstElementChild as HTMLElement;
+        // type => (active | finished)
+        this.sectionElement.id = `${this.type}-projects`;
+
+        this.attach()
+        this.renderContent()
+    }
+
+    private renderContent() {
+        const listId = `${this.type}-projects-list`;
+        this.sectionElement.querySelector("ul")!.id = listId;
+        this.sectionElement.querySelector("h2")!.textContent = this.type.toUpperCase() + "PROJECT";
+    }
+
+    // attach (section of project list) to (app) 
+    private attach = () => {
+        this.hostElement.insertAdjacentElement("beforeend",this.sectionElement)
+    }
+}
+
 // task of this class: => import form element to (app)
 class ProjectInput{
     templateElement: HTMLTemplateElement;
@@ -110,3 +147,6 @@ class ProjectInput{
 }
 
 const projectInput = new ProjectInput();
+
+const activeProjectList = new ProjectList("active");
+const finishedProjectList = new ProjectList("finished");

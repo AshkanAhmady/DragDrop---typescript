@@ -20,6 +20,35 @@ function validate(validatableInput) {
     }
     return isValid;
 }
+// task of this class: => import list of projects to (app)
+class ProjectList {
+    // we can also define (type) like this
+    // private type = "active" | "finished"
+    constructor(type) {
+        this.type = type;
+        // attach (section of project list) to (app) 
+        this.attach = () => {
+            this.hostElement.insertAdjacentElement("beforeend", this.sectionElement);
+        };
+        this.templateElement = document.getElementById("project-list");
+        this.hostElement = document.getElementById("app");
+        // get form inside of (template element)
+        const importedNode = document.importNode(
+        // this content is the form
+        // true => for deep copy of nested elements
+        this.templateElement.content, true);
+        this.sectionElement = importedNode.firstElementChild;
+        // type => (active | finished)
+        this.sectionElement.id = `${this.type}-projects`;
+        this.attach();
+        this.renderContent();
+    }
+    renderContent() {
+        const listId = `${this.type}-projects-list`;
+        this.sectionElement.querySelector("ul").id = listId;
+        this.sectionElement.querySelector("h2").textContent = this.type.toUpperCase() + "PROJECT";
+    }
+}
 // task of this class: => import form element to (app)
 class ProjectInput {
     constructor() {
@@ -81,3 +110,5 @@ class ProjectInput {
     }
 }
 const projectInput = new ProjectInput();
+const activeProjectList = new ProjectList("active");
+const finishedProjectList = new ProjectList("finished");
