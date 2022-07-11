@@ -121,7 +121,14 @@ class ProjectList{
         // register (listener) of ProjectState in here
         // put all data in the (projects array) to assignedProjects
         projectState.addListener((projects: Project[]) => {
-            this.assignedProjects = projects;
+            // relevantProject if projects that filtered by type of this class (active | finished)
+            const relevantProject = projects.filter((prj) => {
+                if(this.type === "active") {
+                    return prj.status === ProjectStatus.Active
+                }
+                return prj.status === ProjectStatus.Finished
+            })
+            this.assignedProjects = relevantProject;
             this.renderProjects();
         })
 
@@ -132,6 +139,8 @@ class ProjectList{
     private renderProjects() {
         // the (UlElement) that is in the (section) element
         const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+        // after any add project, we should empty the ul to stop duplicate
+        listEl.innerHTML = "";
         // put the all data in the (assignedProject) to liElement and put that to ULElement 
         // that is in the sectionElement
         for(const projectItem of this.assignedProjects) {
