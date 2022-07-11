@@ -1,4 +1,25 @@
 "use strict";
+// form validation function
+function validate(validatableInput) {
+    let isValid = true;
+    // if required sets for input of validate function
+    if (validatableInput.required) {
+        isValid = isValid && validatableInput.value.toString().length !== 0;
+    }
+    if (validatableInput.minLength != null && typeof validatableInput.value === "string") {
+        isValid = isValid && validatableInput.value.trim().length >= validatableInput.minLength;
+    }
+    if (validatableInput.maxLength != null && typeof validatableInput.value === "string") {
+        isValid = isValid && validatableInput.value.trim().length <= validatableInput.maxLength;
+    }
+    if (validatableInput.min != null && typeof validatableInput.value === "number") {
+        isValid = isValid && validatableInput.value >= validatableInput.min;
+    }
+    if (validatableInput.max != null && typeof validatableInput.value === "number") {
+        isValid = isValid && validatableInput.value <= validatableInput.max;
+    }
+    return isValid;
+}
 // task of this class: => import form element to (app)
 class ProjectInput {
     constructor() {
@@ -7,9 +28,9 @@ class ProjectInput {
             const enteredTitle = this.titleInpurElement.value;
             const enteredDescription = this.descriptionInputElement.value;
             const enteredPeople = this.peopleInputElement.value;
-            if (enteredTitle.trim().length === 0 ||
-                enteredDescription.trim().length === 0 ||
-                enteredPeople.trim().length === 0) {
+            if (!validate({ value: enteredTitle, required: true }) ||
+                !validate({ value: enteredDescription, required: true, minLength: 5 }) ||
+                !validate({ value: enteredPeople, required: true, min: 1, max: 10 })) {
                 alert("input is invalid, please try again!");
                 return;
             }
