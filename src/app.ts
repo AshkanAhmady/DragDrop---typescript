@@ -31,11 +31,30 @@ function validate(validatableInput: Validatable) {
     return isValid;
 }
 
+// Project Type
+enum ProjectStatus {
+    Active,
+    Finished
+}
+
+class Project{
+    constructor(
+        public id: number, 
+        public title: string, 
+        public description: string, 
+        public people: number, 
+        public status: ProjectStatus
+    ) {}
+}
+
+// listener type
+type Listener = (items: Project[]) => void;
+
 // task of this class: => managing state of projects
 class ProjecstState{
     // array of functions
-    private listeners: any[] = [];
-    private projects: any[] = [];
+    private listeners: Listener[] = [];
+    private projects: Project[] = [];
     // to get this class with this (instance) in another classes
     private static instance: ProjecstState;
 
@@ -52,18 +71,14 @@ class ProjecstState{
         return this.instance;
     }
 
-    addListener(listenerFn: Function) {
+    addListener(listenerFn: Listener) {
         this.listeners.push(listenerFn)
     }
 
     // push the nuew project to projects array of object
     addProject(title: string, description: string, numOfPeople: number) {
-        const newProject = {
-            id: Date.now(),
-            title: title,
-            description: description,
-            people: numOfPeople
-        }
+        // use (Project) class to set the type of values of object of project
+        const newProject = new Project(Date.now(),title,description,numOfPeople,ProjectStatus.Active)
         this.projects.push(newProject);
         for (const listenerFn of this.listeners) {
             // return copy of the array to listener
@@ -83,7 +98,8 @@ class ProjectList{
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
     sectionElement: HTMLElement;
-    assignedProjects: any[];
+    // the type of the data must be Project type
+    assignedProjects: Project[];
 
     // we can also define (type) like this
     // private type = "active" | "finished"
@@ -104,7 +120,7 @@ class ProjectList{
 
         // register (listener) of ProjectState in here
         // put all data in the (projects array) to assignedProjects
-        projectState.addListener((projects: any[]) => {
+        projectState.addListener((projects: Project[]) => {
             this.assignedProjects = projects;
             this.renderProjects();
         })

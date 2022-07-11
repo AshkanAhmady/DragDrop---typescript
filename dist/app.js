@@ -20,6 +20,21 @@ function validate(validatableInput) {
     }
     return isValid;
 }
+// Project Type
+var ProjectStatus;
+(function (ProjectStatus) {
+    ProjectStatus[ProjectStatus["Active"] = 0] = "Active";
+    ProjectStatus[ProjectStatus["Finished"] = 1] = "Finished";
+})(ProjectStatus || (ProjectStatus = {}));
+class Project {
+    constructor(id, title, description, people, status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.people = people;
+        this.status = status;
+    }
+}
 // task of this class: => managing state of projects
 class ProjecstState {
     constructor() {
@@ -40,12 +55,8 @@ class ProjecstState {
     }
     // push the nuew project to projects array of object
     addProject(title, description, numOfPeople) {
-        const newProject = {
-            id: Date.now(),
-            title: title,
-            description: description,
-            people: numOfPeople
-        };
+        // use (Project) class to set the type of values of object of project
+        const newProject = new Project(Date.now(), title, description, numOfPeople, ProjectStatus.Active);
         this.projects.push(newProject);
         for (const listenerFn of this.listeners) {
             // return copy of the array to listener
