@@ -20,6 +20,44 @@ function validate(validatableInput) {
     }
     return isValid;
 }
+// task of this class: => managing state of projects
+class ProjecstState {
+    constructor() {
+        // array of functions
+        this.listeners = [];
+        this.projects = [];
+    }
+    // create istance of classe and store that in instance property
+    static getInstance() {
+        if (this.instance) {
+            return this.instance;
+        }
+        this.instance = new ProjecstState();
+        return this.instance;
+    }
+    addListener(listenerFn) {
+        this.listeners.push(listenerFn);
+    }
+    // push the nuew project to projects array of object
+    addProject(title, description, numOfPeople) {
+        const newProject = {
+            id: Date.now(),
+            title: title,
+            description: description,
+            people: numOfPeople
+        };
+        this.projects.push(newProject);
+        for (const listenerFn of this.listeners) {
+            // return copy of the array to listener
+            // because we need the ojects and if we dont copy and change this objects
+            // the object changes everywer
+            listenerFn(this.projects.slice());
+        }
+    }
+}
+// create instance of (ProjectState class) with this static method
+// ProjectState is the instance of (ProjectState class)
+const projectState = ProjecstState.getInstance();
 // task of this class: => import list of projects to (app)
 class ProjectList {
     // we can also define (type) like this
@@ -40,13 +78,32 @@ class ProjectList {
         this.sectionElement = importedNode.firstElementChild;
         // type => (active | finished)
         this.sectionElement.id = `${this.type}-projects`;
+        this.assignedProjects = [];
+        // register (listener) of ProjectState in here
+        // put all data in the (projects array) to assignedProjects
+        projectState.addListener((projects) => {
+            this.assignedProjects = projects;
+            this.renderProjects();
+        });
         this.attach();
         this.renderContent();
+    }
+    renderProjects() {
+        // the (UlElement) that is in the (section) element
+        const listEl = document.getElementById(`${this.type}-projects-list`);
+        // put the all data in the (assignedProject) to liElement and put that to ULElement 
+        // that is in the sectionElement
+        for (const projectItem of this.assignedProjects) {
+            const listItem = document.createElement("li");
+            // show the title of the project in th (Li) element
+            listItem.textContent = projectItem.title;
+            listEl.appendChild(listItem);
+        }
     }
     renderContent() {
         const listId = `${this.type}-projects-list`;
         this.sectionElement.querySelector("ul").id = listId;
-        this.sectionElement.querySelector("h2").textContent = this.type.toUpperCase() + "PROJECT";
+        this.sectionElement.querySelector("h2").textContent = this.type.toUpperCase() + " PROJECT";
     }
 }
 // task of this class: => import form element to (app)
@@ -73,7 +130,8 @@ class ProjectInput {
             // check for tuple => tuple is an array
             if (Array.isArray(userInput)) {
                 const [title, description, people] = userInput;
-                console.log(title, description, people);
+                // put this three data to (ProjectState class) and store them with addProject
+                projectState === null || projectState === void 0 ? void 0 : projectState.addProject(title, description, people);
                 this.cleareInput();
             }
         };
