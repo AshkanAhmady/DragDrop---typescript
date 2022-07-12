@@ -48,18 +48,27 @@ class Project{
 }
 
 // listener type
-type Listener = (items: Project[]) => void;
+type Listener<T> = (items: T[]) => void;
+
+// maybe we have more than one class and we can use this class to define inheritance
+class State<T>{
+    // array of functions
+    protected listeners: Listener<T>[] = [];
+
+    addListener(listenerFn: Listener<T>) {
+        this.listeners.push(listenerFn)
+    }
+}
 
 // task of this class: => managing state of projects
-class ProjecstState{
-    // array of functions
-    private listeners: Listener[] = [];
+class ProjecstState extends State<Project>{
+
     private projects: Project[] = [];
     // to get this class with this (instance) in another classes
     private static instance: ProjecstState;
 
     private constructor() {
-
+        super();
     }
 
     // create istance of classe and store that in instance property
@@ -71,9 +80,7 @@ class ProjecstState{
         return this.instance;
     }
 
-    addListener(listenerFn: Listener) {
-        this.listeners.push(listenerFn)
-    }
+
 
     // push the nuew project to projects array of object
     addProject(title: string, description: string, numOfPeople: number) {
@@ -93,31 +100,71 @@ class ProjecstState{
 // ProjectState is the instance of (ProjectState class)
 const projectState = ProjecstState.getInstance();
 
-// task of this class: => import list of projects to (app)
-class ProjectList{
-    templateElement: HTMLTemplateElement;
-    hostElement: HTMLDivElement;
-    sectionElement: HTMLElement;
-    // the type of the data must be Project type
-    assignedProjects: Project[];
 
-    // we can also define (type) like this
-    // private type = "active" | "finished"
-    constructor(private type: "active" | "finished") {
-        this.templateElement = document.getElementById("project-list")! as HTMLTemplateElement;
-        this.hostElement = document.getElementById("app")! as HTMLDivElement;
+
+
+
+
+
+
+// this is the Base class for (ProjectList & ProjectInput) to inherit this two class and clean the codes
+abstract class Component<T extends HTMLElement, U extends HTMLElement> {
+    templateElement: HTMLTemplateElement;
+    hostElement: T;
+    selectedElement: U;
+
+    // select elements dynamicly
+    constructor(
+        templateId: string, 
+        hostElementId: string, 
+        // attach chil element in where place of pattenr element
+        //true=> afterbegening
+        //false=> beforeend
+        insertAtStart: boolean,
+        newElementId?: string
+    ) {
+        this.templateElement = document.getElementById(templateId)! as HTMLTemplateElement;
+        this.hostElement = document.getElementById(hostElementId)! as T;
         // get form inside of (template element)
         const importedNode = document.importNode(
             // this content is the form
             // true => for deep copy of nested elements
             this.templateElement.content, true
         );
-        this.sectionElement = importedNode.firstElementChild as HTMLElement;
-        // type => (active | finished)
-        this.sectionElement.id = `${this.type}-projects`;
+        this.selectedElement = importedNode.firstElementChild as U;
+        if(newElementId) {
+            // type => (active | finished)
+            this.selectedElement.id = newElementId;
+        }
+
+        this.attach(insertAtStart);
+    }
+
+    abstract configure?(): void;
+    abstract renderContent?(): void;
+
+    // attach (section of project list) to (app) 
+    private attach = (insertAtStart: boolean) => {
+        this.hostElement.insertAdjacentElement(insertAtStart ? "afterbegin" : "beforeend",this.selectedElement)
+    }
+}
+
+// task of this class: => import list of projects to (app)
+class ProjectList extends Component<HTMLDivElement,HTMLElement>{
+    // the type of the data must be Project type
+    assignedProjects: Project[];
+
+    // we can also define (type) like this
+    // private type = "active" | "finished"
+    constructor(private type: "active" | "finished") {
+        super("project-list", "app", false, `${type}-projects`);
         this.assignedProjects = []
 
+        this.configure();
+        this.renderContent()
+    }
 
+    configure() {
         // register (listener) of ProjectState in here
         // put all data in the (projects array) to assignedProjects
         projectState.addListener((projects: Project[]) => {
@@ -131,9 +178,12 @@ class ProjectList{
             this.assignedProjects = relevantProject;
             this.renderProjects();
         })
+    }
 
-        this.attach()
-        this.renderContent()
+    renderContent() {
+        const listId = `${this.type}-projects-list`;
+        this.selectedElement.querySelector("ul")!.id = listId;
+        this.selectedElement.querySelector("h2")!.textContent = this.type.toUpperCase() + " PROJECT";
     }
 
     private renderProjects() {
@@ -141,8 +191,8 @@ class ProjectList{
         const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
         // after any add project, we should empty the ul to stop duplicate
         listEl.innerHTML = "";
-        // put the all data in the (assignedProject) to liElement and put that to ULElement 
-        // that is in the sectionElement
+        // put the all data in the (assignedProject) to (liElement) and put that to ULElement 
+        // that is in the selectedElement
         for(const projectItem of this.assignedProjects) {
             const listItem = document.createElement("li");
             // show the title of the project in th (Li) element
@@ -150,49 +200,30 @@ class ProjectList{
             listEl.appendChild(listItem);
         }
     }
-
-    private renderContent() {
-        const listId = `${this.type}-projects-list`;
-        this.sectionElement.querySelector("ul")!.id = listId;
-        this.sectionElement.querySelector("h2")!.textContent = this.type.toUpperCase() + " PROJECT";
-    }
-
-    // attach (section of project list) to (app) 
-    private attach = () => {
-        this.hostElement.insertAdjacentElement("beforeend",this.sectionElement)
-    }
 }
 
 // task of this class: => import form element to (app)
-class ProjectInput{
-    templateElement: HTMLTemplateElement;
-    hostElement: HTMLDivElement;
-    formElement: HTMLFormElement;
+class ProjectInput extends Component<HTMLDivElement, HTMLFormElement>{
     titleInpurElement: HTMLInputElement;
     descriptionInputElement: HTMLInputElement;
     peopleInputElement: HTMLInputElement;
 
     constructor() {
-        //  ! => for say to typescript, this EL is not null
-        // as => for say, this element what exactually is
-        this.templateElement = document.getElementById("project-input")! as HTMLTemplateElement;
-        this.hostElement = document.getElementById("app")! as HTMLDivElement;
-        // get form inside of (template element)
-        const importedNode = document.importNode(
-            // this content is the form
-            // true => for deep copy of nested elements
-            this.templateElement.content, true
-        );
-        this.formElement = importedNode.firstElementChild as HTMLFormElement;
-        this.formElement.id = "user-input";
-        // select inputs from (formElement)
-        this.titleInpurElement = this.formElement.querySelector("#title") as HTMLInputElement;
-        this.descriptionInputElement = this.formElement.querySelector("#description") as HTMLInputElement;
-        this.peopleInputElement = this.formElement.querySelector("#people") as HTMLInputElement;
+        super("project-input", "app", true, "user-input")
+        // select inputs from (selectedElement)
+        this.titleInpurElement = this.selectedElement.querySelector("#title") as HTMLInputElement;
+        this.descriptionInputElement = this.selectedElement.querySelector("#description") as HTMLInputElement;
+        this.peopleInputElement = this.selectedElement.querySelector("#people") as HTMLInputElement;
 
         this.configure();
-        this.attach();
     }
+
+    // do things when we (submit) form
+    configure = () => {
+        this.selectedElement.addEventListener("submit",this.submitHandler)        
+    }
+
+    renderContent = () => {}
 
     // type of this method is (tuple OR void)
     private gatherUserInput = (): [string,string, number] | void => {
@@ -229,17 +260,6 @@ class ProjectInput{
         this.descriptionInputElement.value = ""
         this.peopleInputElement.value = ""
     }
-
-    // do things when we (submit) form
-    private configure = () => {
-        this.formElement.addEventListener("submit",this.submitHandler)        
-    }
-    
-    // attach (form) to (app) 
-    private attach = () => {
-        this.hostElement.insertAdjacentElement("afterbegin",this.formElement)
-    }
-
 }
 
 const projectInput = new ProjectInput();
