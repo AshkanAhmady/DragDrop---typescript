@@ -1,3 +1,16 @@
+// the element that we can drag it: => (singleProject)
+interface Draggable{
+    dragStartHandler(event: DragEvent): void;
+    dragEndHandler(event: DragEvent): void
+}
+
+// the spaces that we can drag in it:=> (activeProject && finishedProje space)
+interface DragTarget{
+    dragOverHandler(event: DragEvent): void
+    dropHandler(event: DragEvent): void
+    dragLeaveHandler(event: DragEvent): void
+}
+
 // validation interface
 interface Validatable{
     value: string | number;
@@ -153,7 +166,8 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
 }
 
 // single product
-class SingleProject extends Component<HTMLUListElement,HTMLLIElement>{
+// implements :=> to use interface in classes
+class SingleProject extends Component<HTMLUListElement,HTMLLIElement> implements Draggable{
     // use this class to extends all data in the project
     private project: Project;
 
@@ -173,7 +187,18 @@ class SingleProject extends Component<HTMLUListElement,HTMLLIElement>{
         this.renderContent();
     }
 
-    configure() {}
+    dragStartHandler(event: DragEvent): void {
+        console.log(event)
+    }
+
+    dragEndHandler(_: DragEvent): void {
+        console.log("dragged")
+    }
+
+    configure() {
+        this.selectedElement.addEventListener("dragstart", this.dragStartHandler)
+        this.selectedElement.addEventListener("dragend", this.dragEndHandler)
+    }
 
     renderContent() {
         this.selectedElement.querySelector("h2")!.textContent = this.project.title;

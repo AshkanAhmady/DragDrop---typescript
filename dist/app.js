@@ -106,6 +106,7 @@ class Component {
     }
 }
 // single product
+// implements :=> to use interface in classes
 class SingleProject extends Component {
     constructor(hostId, project) {
         super("single-project", hostId, false, project.id);
@@ -121,7 +122,16 @@ class SingleProject extends Component {
             return this.project.people + " persons ";
         }
     }
-    configure() { }
+    dragStartHandler(event) {
+        console.log(event);
+    }
+    dragEndHandler(_) {
+        console.log("dragged");
+    }
+    configure() {
+        this.selectedElement.addEventListener("dragstart", this.dragStartHandler);
+        this.selectedElement.addEventListener("dragend", this.dragEndHandler);
+    }
     renderContent() {
         this.selectedElement.querySelector("h2").textContent = this.project.title;
         // we use the (persons) getter like normal property and dont use parentheses
