@@ -37,6 +37,9 @@ enum ProjectStatus {
     Finished
 }
 
+// project type
+//we can use (interface | class) but we use the class to able to use (instantiate) it.
+//we create an object to have the object of one project thats have this values
 class Project{
     constructor(
         public id: string, 
@@ -153,6 +156,15 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
 class SingleProject extends Component<HTMLUListElement,HTMLLIElement>{
     // use this class to extends all data in the project
     private project: Project;
+
+    get persons() {
+        if(this.project.people === 1) {
+            return "1 person "; 
+        }else {
+            return this.project.people + " persons "
+        }
+    }
+
     constructor(hostId:string, project: Project) {
         super("single-project", hostId,false,project.id);
         this.project = project;
@@ -165,7 +177,8 @@ class SingleProject extends Component<HTMLUListElement,HTMLLIElement>{
 
     renderContent() {
         this.selectedElement.querySelector("h2")!.textContent = this.project.title;
-        this.selectedElement.querySelector("h3")!.textContent = this.project.people.toString();
+        // we use the (persons) getter like normal property and dont use parentheses
+        this.selectedElement.querySelector("h3")!.textContent = this.persons + "assigned";
         this.selectedElement.querySelector("p")!.textContent = this.project.description;
     }
 }

@@ -26,6 +26,9 @@ var ProjectStatus;
     ProjectStatus[ProjectStatus["Active"] = 0] = "Active";
     ProjectStatus[ProjectStatus["Finished"] = 1] = "Finished";
 })(ProjectStatus || (ProjectStatus = {}));
+// project type
+//we can use (interface | class) but we use the class to able to use (instantiate) it.
+//we create an object to have the object of one project thats have this values
 class Project {
     constructor(id, title, description, people, status) {
         this.id = id;
@@ -110,10 +113,19 @@ class SingleProject extends Component {
         this.configure();
         this.renderContent();
     }
+    get persons() {
+        if (this.project.people === 1) {
+            return "1 person ";
+        }
+        else {
+            return this.project.people + " persons ";
+        }
+    }
     configure() { }
     renderContent() {
         this.selectedElement.querySelector("h2").textContent = this.project.title;
-        this.selectedElement.querySelector("h3").textContent = this.project.people.toString();
+        // we use the (persons) getter like normal property and dont use parentheses
+        this.selectedElement.querySelector("h3").textContent = this.persons + "assigned";
         this.selectedElement.querySelector("p").textContent = this.project.description;
     }
 }
