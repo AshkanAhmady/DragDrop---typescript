@@ -1,7 +1,7 @@
-import { Component } from "./baseComponent.js";
-import { ProjectStatus } from "../modules/project.js";
-import { projectState } from "../state/projectState.js";
-import { SingleProject } from "./singleProject.js";
+import { Component } from "./baseComponent";
+import { ProjectStatus } from "../modules/project";
+import { projectState } from "../state/projectState";
+import { SingleProject } from "./singleProject";
 // task of this class: => import list of projects to (app)
 export class ProjectList extends Component {
     // we can also define (type) like this

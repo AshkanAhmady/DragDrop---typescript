@@ -1,4 +1,4 @@
-import { Project, ProjectStatus } from "../modules/project.js";
+import { Project, ProjectStatus } from "../modules/project";
 // maybe we have more than one class and we can use this class to define inheritance
 class State {
     constructor() {

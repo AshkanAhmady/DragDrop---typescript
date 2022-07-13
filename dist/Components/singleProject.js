@@ -1,4 +1,4 @@
-import { Component } from "./baseComponent.js";
+import { Component } from "./baseComponent";
 // single product
 // implements :=> to use interface in classes
 export class SingleProject extends Component {

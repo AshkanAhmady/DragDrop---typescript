@@ -1,6 +1,6 @@
-import {Component} from "./baseComponent.js";
-import { Draggable } from "../modules/drag&drop.js";
-import {Project} from "../modules/project.js"
+import {Component} from "./baseComponent";
+import { Draggable } from "../modules/drag&drop";
+import {Project} from "../modules/project"
 
 // single product
 // implements :=> to use interface in classes

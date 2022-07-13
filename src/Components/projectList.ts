@@ -1,8 +1,8 @@
-import { DragTarget } from "../modules/drag&drop.js";
-import {Component} from "./baseComponent.js";
-import {Project, ProjectStatus} from "../modules/project.js";
-import {projectState} from "../state/projectState.js";
-import {SingleProject} from "./singleProject.js"
+import { DragTarget } from "../modules/drag&drop";
+import {Component} from "./baseComponent";
+import {Project, ProjectStatus} from "../modules/project";
+import {projectState} from "../state/projectState";
+import {SingleProject} from "./singleProject"
 
 
 

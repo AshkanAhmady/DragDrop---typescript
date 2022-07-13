@@ -1,6 +1,6 @@
-import { Component } from "./baseComponent.js";
-import { validate } from "../util/validation.js";
-import { projectState } from "../state/projectState.js";
+import { Component } from "./baseComponent";
+import { validate } from "../util/validation";
+import { projectState } from "../state/projectState";
 // task of this class: => import form element to (app)
 export class ProjectInput extends Component {
     constructor() {
