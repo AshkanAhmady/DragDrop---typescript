@@ -110,6 +110,12 @@ class Component {
 class SingleProject extends Component {
     constructor(hostId, project) {
         super("single-project", hostId, false, project.id);
+        this.dragStartHandler = (event) => {
+            console.log(event);
+        };
+        this.dragEndHandler = (_) => {
+            console.log("dragged");
+        };
         this.project = project;
         this.configure();
         this.renderContent();
@@ -121,12 +127,6 @@ class SingleProject extends Component {
         else {
             return this.project.people + " persons ";
         }
-    }
-    dragStartHandler(event) {
-        console.log(event);
-    }
-    dragEndHandler(_) {
-        console.log("dragged");
     }
     configure() {
         this.selectedElement.addEventListener("dragstart", this.dragStartHandler);
@@ -146,11 +146,25 @@ class ProjectList extends Component {
     constructor(type) {
         super("project-list", "app", false, `${type}-projects`);
         this.type = type;
+        this.dragOverHandler = (event) => {
+            let listEl = this.selectedElement.querySelector("ul");
+            listEl.classList.add("droppable");
+        };
+        this.dragLeaveHandler = (event) => {
+            let listEl = this.selectedElement.querySelector("ul");
+            listEl.classList.remove("droppable");
+        };
+        this.dropHandler = (event) => {
+        };
         this.assignedProjects = [];
         this.configure();
         this.renderContent();
     }
     configure() {
+        // drag events
+        this.selectedElement.addEventListener("dragover", this.dragOverHandler);
+        this.selectedElement.addEventListener("dragleave", this.dragLeaveHandler);
+        this.selectedElement.addEventListener("drop", this.dropHandler);
         // register (listener) of ProjectState in here
         // put all data in the (projects array) to assignedProjects
         projectState.addListener((projects) => {

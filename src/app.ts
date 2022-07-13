@@ -187,11 +187,11 @@ class SingleProject extends Component<HTMLUListElement,HTMLLIElement> implements
         this.renderContent();
     }
 
-    dragStartHandler(event: DragEvent): void {
+    dragStartHandler = (event: DragEvent): void =>  {
         console.log(event)
     }
 
-    dragEndHandler(_: DragEvent): void {
+    dragEndHandler = (_: DragEvent): void => {
         console.log("dragged")
     }
 
@@ -208,7 +208,7 @@ class SingleProject extends Component<HTMLUListElement,HTMLLIElement> implements
     }
 }
 // task of this class: => import list of projects to (app)
-class ProjectList extends Component<HTMLDivElement,HTMLElement>{
+class ProjectList extends Component<HTMLDivElement,HTMLElement> implements DragTarget{
     // the type of the data must be Project type
     assignedProjects: Project[];
 
@@ -222,7 +222,26 @@ class ProjectList extends Component<HTMLDivElement,HTMLElement>{
         this.renderContent()
     }
 
+    dragOverHandler = (event: DragEvent): void => {
+        let listEl = this.selectedElement.querySelector("ul")!;
+        listEl.classList.add("droppable")
+    }
+
+    dragLeaveHandler = (event: DragEvent): void => {
+        let listEl = this.selectedElement.querySelector("ul")!;
+        listEl.classList.remove("droppable")
+    }
+
+    dropHandler = (event: DragEvent): void  =>{
+        
+    }
+
     configure() {
+        // drag events
+        this.selectedElement.addEventListener("dragover", this.dragOverHandler)
+        this.selectedElement.addEventListener("dragleave", this.dragLeaveHandler)
+        this.selectedElement.addEventListener("drop", this.dropHandler)
+
         // register (listener) of ProjectState in here
         // put all data in the (projects array) to assignedProjects
         projectState.addListener((projects: Project[]) => {
