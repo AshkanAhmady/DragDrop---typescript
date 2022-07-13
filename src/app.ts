@@ -103,6 +103,19 @@ class ProjecstState extends State<Project>{
         // use (Project) class to set the type of values of object of project
         const newProject = new Project(Date.now().toString(),title,description,numOfPeople,ProjectStatus.Active)
         this.projects.push(newProject);
+        this.updateListeners()
+    }
+
+    moveProject(projectId: string, newStatus: ProjectStatus) {
+        const project = this.projects.find((prj) => prj.id === projectId);
+        // second condition is for stop extra rendering DOM
+        if(project && project.status !== newStatus) {
+            project.status = newStatus;
+            this.updateListeners()
+        }
+    }
+
+    private updateListeners = () => {
         for (const listenerFn of this.listeners) {
             // return copy of the array to listener
             // because we need the ojects and if we dont copy and change this objects
@@ -237,8 +250,13 @@ class ProjectList extends Component<HTMLDivElement,HTMLElement> implements DragT
         listEl.classList.remove("droppable")
     }
 
+    // if this drop doing in (active) type => update status to active
+    // if this drop doing in (finished) type => update status to finished
     dropHandler = (event: DragEvent): void  =>{
-        console.log(event)
+        const projectId = event.dataTransfer!.getData("text/plain");
+        // we can with (type) property say if ower drop action is in (active) box, so update Projectstatus to active
+        // and otherwise finish it.
+        projectState.moveProject(projectId, this.type === "active" ? ProjectStatus.Active : ProjectStatus.Finished)
     }
 
     configure() {
