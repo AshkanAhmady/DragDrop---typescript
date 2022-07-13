@@ -35,11 +35,20 @@ class Project {
         this.status = status;
     }
 }
-// task of this class: => managing state of projects
-class ProjecstState {
+// maybe we have more than one class and we can use this class to define inheritance
+class State {
     constructor() {
         // array of functions
         this.listeners = [];
+    }
+    addListener(listenerFn) {
+        this.listeners.push(listenerFn);
+    }
+}
+// task of this class: => managing state of projects
+class ProjecstState extends State {
+    constructor() {
+        super();
         this.projects = [];
     }
     // create istance of classe and store that in instance property
@@ -50,13 +59,10 @@ class ProjecstState {
         this.instance = new ProjecstState();
         return this.instance;
     }
-    addListener(listenerFn) {
-        this.listeners.push(listenerFn);
-    }
     // push the nuew project to projects array of object
     addProject(title, description, numOfPeople) {
         // use (Project) class to set the type of values of object of project
-        const newProject = new Project(Date.now(), title, description, numOfPeople, ProjectStatus.Active);
+        const newProject = new Project(Date.now().toString(), title, description, numOfPeople, ProjectStatus.Active);
         this.projects.push(newProject);
         for (const listenerFn of this.listeners) {
             // return copy of the array to listener
@@ -69,27 +75,60 @@ class ProjecstState {
 // create instance of (ProjectState class) with this static method
 // ProjectState is the instance of (ProjectState class)
 const projectState = ProjecstState.getInstance();
-// task of this class: => import list of projects to (app)
-class ProjectList {
-    // we can also define (type) like this
-    // private type = "active" | "finished"
-    constructor(type) {
-        this.type = type;
+// this is the Base class for (ProjectList & ProjectInput) to inherit this two class and clean the codes
+class Component {
+    // select elements dynamicly
+    constructor(templateId, hostElementId, 
+    // attach chil element in where place of pattenr element
+    //true=> afterbegening
+    //false=> beforeend
+    insertAtStart, newElementId) {
         // attach (section of project list) to (app) 
-        this.attach = () => {
-            this.hostElement.insertAdjacentElement("beforeend", this.sectionElement);
+        this.attach = (insertAtStart) => {
+            this.hostElement.insertAdjacentElement(insertAtStart ? "afterbegin" : "beforeend", this.selectedElement);
         };
-        this.templateElement = document.getElementById("project-list");
-        this.hostElement = document.getElementById("app");
+        this.templateElement = document.getElementById(templateId);
+        this.hostElement = document.getElementById(hostElementId);
         // get form inside of (template element)
         const importedNode = document.importNode(
         // this content is the form
         // true => for deep copy of nested elements
         this.templateElement.content, true);
-        this.sectionElement = importedNode.firstElementChild;
-        // type => (active | finished)
-        this.sectionElement.id = `${this.type}-projects`;
+        this.selectedElement = importedNode.firstElementChild;
+        if (newElementId) {
+            // type => (active | finished)
+            this.selectedElement.id = newElementId;
+        }
+        this.attach(insertAtStart);
+    }
+}
+// single product
+class SingleProject extends Component {
+    constructor(hostId, project) {
+        super("single-project", hostId, false, project.id);
+        this.project = project;
+        this.configure();
+        this.renderContent();
+    }
+    configure() { }
+    renderContent() {
+        this.selectedElement.querySelector("h2").textContent = this.project.title;
+        this.selectedElement.querySelector("h3").textContent = this.project.people.toString();
+        this.selectedElement.querySelector("p").textContent = this.project.description;
+    }
+}
+// task of this class: => import list of projects to (app)
+class ProjectList extends Component {
+    // we can also define (type) like this
+    // private type = "active" | "finished"
+    constructor(type) {
+        super("project-list", "app", false, `${type}-projects`);
+        this.type = type;
         this.assignedProjects = [];
+        this.configure();
+        this.renderContent();
+    }
+    configure() {
         // register (listener) of ProjectState in here
         // put all data in the (projects array) to assignedProjects
         projectState.addListener((projects) => {
@@ -103,32 +142,38 @@ class ProjectList {
             this.assignedProjects = relevantProject;
             this.renderProjects();
         });
-        this.attach();
-        this.renderContent();
+    }
+    renderContent() {
+        const listId = `${this.type}-projects-list`;
+        this.selectedElement.querySelector("ul").id = listId;
+        this.selectedElement.querySelector("h2").textContent = this.type.toUpperCase() + " PROJECT";
     }
     renderProjects() {
         // the (UlElement) that is in the (section) element
         const listEl = document.getElementById(`${this.type}-projects-list`);
         // after any add project, we should empty the ul to stop duplicate
         listEl.innerHTML = "";
-        // put the all data in the (assignedProject) to liElement and put that to ULElement 
-        // that is in the sectionElement
+        // put the all data in the (assignedProject) to (liElement) and put that to ULElement 
+        // that is in the selectedElement
         for (const projectItem of this.assignedProjects) {
-            const listItem = document.createElement("li");
-            // show the title of the project in th (Li) element
-            listItem.textContent = projectItem.title;
-            listEl.appendChild(listItem);
+            // with (singleProject) class we append single project to project list
+            new SingleProject(this.selectedElement.querySelector("ul").id, projectItem);
+            // const listItem = document.createElement("li");
+            // // show the title of the project in th (Li) element
+            // listItem.textContent = projectItem.title;
+            // listEl.appendChild(listItem);
         }
-    }
-    renderContent() {
-        const listId = `${this.type}-projects-list`;
-        this.sectionElement.querySelector("ul").id = listId;
-        this.sectionElement.querySelector("h2").textContent = this.type.toUpperCase() + " PROJECT";
     }
 }
 // task of this class: => import form element to (app)
-class ProjectInput {
+class ProjectInput extends Component {
     constructor() {
+        super("project-input", "app", true, "user-input");
+        // do things when we (submit) form
+        this.configure = () => {
+            this.selectedElement.addEventListener("submit", this.submitHandler);
+        };
+        this.renderContent = () => { };
         // type of this method is (tuple OR void)
         this.gatherUserInput = () => {
             const enteredTitle = this.titleInpurElement.value;
@@ -155,31 +200,11 @@ class ProjectInput {
                 this.cleareInput();
             }
         };
-        // do things when we (submit) form
-        this.configure = () => {
-            this.formElement.addEventListener("submit", this.submitHandler);
-        };
-        // attach (form) to (app) 
-        this.attach = () => {
-            this.hostElement.insertAdjacentElement("afterbegin", this.formElement);
-        };
-        //  ! => for say to typescript, this EL is not null
-        // as => for say, this element what exactually is
-        this.templateElement = document.getElementById("project-input");
-        this.hostElement = document.getElementById("app");
-        // get form inside of (template element)
-        const importedNode = document.importNode(
-        // this content is the form
-        // true => for deep copy of nested elements
-        this.templateElement.content, true);
-        this.formElement = importedNode.firstElementChild;
-        this.formElement.id = "user-input";
-        // select inputs from (formElement)
-        this.titleInpurElement = this.formElement.querySelector("#title");
-        this.descriptionInputElement = this.formElement.querySelector("#description");
-        this.peopleInputElement = this.formElement.querySelector("#people");
+        // select inputs from (selectedElement)
+        this.titleInpurElement = this.selectedElement.querySelector("#title");
+        this.descriptionInputElement = this.selectedElement.querySelector("#description");
+        this.peopleInputElement = this.selectedElement.querySelector("#people");
         this.configure();
-        this.attach();
     }
     cleareInput() {
         this.titleInpurElement.value = "";

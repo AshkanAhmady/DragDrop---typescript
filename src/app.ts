@@ -39,7 +39,7 @@ enum ProjectStatus {
 
 class Project{
     constructor(
-        public id: number, 
+        public id: string, 
         public title: string, 
         public description: string, 
         public people: number, 
@@ -85,7 +85,7 @@ class ProjecstState extends State<Project>{
     // push the nuew project to projects array of object
     addProject(title: string, description: string, numOfPeople: number) {
         // use (Project) class to set the type of values of object of project
-        const newProject = new Project(Date.now(),title,description,numOfPeople,ProjectStatus.Active)
+        const newProject = new Project(Date.now().toString(),title,description,numOfPeople,ProjectStatus.Active)
         this.projects.push(newProject);
         for (const listenerFn of this.listeners) {
             // return copy of the array to listener
@@ -149,6 +149,26 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
     }
 }
 
+// single product
+class SingleProject extends Component<HTMLUListElement,HTMLLIElement>{
+    // use this class to extends all data in the project
+    private project: Project;
+    constructor(hostId:string, project: Project) {
+        super("single-project", hostId,false,project.id);
+        this.project = project;
+
+        this.configure();
+        this.renderContent();
+    }
+
+    configure() {}
+
+    renderContent() {
+        this.selectedElement.querySelector("h2")!.textContent = this.project.title;
+        this.selectedElement.querySelector("h3")!.textContent = this.project.people.toString();
+        this.selectedElement.querySelector("p")!.textContent = this.project.description;
+    }
+}
 // task of this class: => import list of projects to (app)
 class ProjectList extends Component<HTMLDivElement,HTMLElement>{
     // the type of the data must be Project type
@@ -194,10 +214,12 @@ class ProjectList extends Component<HTMLDivElement,HTMLElement>{
         // put the all data in the (assignedProject) to (liElement) and put that to ULElement 
         // that is in the selectedElement
         for(const projectItem of this.assignedProjects) {
-            const listItem = document.createElement("li");
-            // show the title of the project in th (Li) element
-            listItem.textContent = projectItem.title;
-            listEl.appendChild(listItem);
+            // with (singleProject) class we append single project to project list
+            new SingleProject(this.selectedElement.querySelector("ul")!.id, projectItem)
+            // const listItem = document.createElement("li");
+            // // show the title of the project in th (Li) element
+            // listItem.textContent = projectItem.title;
+            // listEl.appendChild(listItem);
         }
     }
 }
