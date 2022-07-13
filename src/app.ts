@@ -188,7 +188,9 @@ class SingleProject extends Component<HTMLUListElement,HTMLLIElement> implements
     }
 
     dragStartHandler = (event: DragEvent): void =>  {
-        console.log(event)
+        // setData(2 input)=> (1): type of data ___ (2): value of data
+        event.dataTransfer!.setData("text/plain", this.project.id);
+        event.dataTransfer!.effectAllowed = "move";
     }
 
     dragEndHandler = (_: DragEvent): void => {
@@ -223,8 +225,11 @@ class ProjectList extends Component<HTMLDivElement,HTMLElement> implements DragT
     }
 
     dragOverHandler = (event: DragEvent): void => {
-        let listEl = this.selectedElement.querySelector("ul")!;
-        listEl.classList.add("droppable")
+        if(event.dataTransfer && event.dataTransfer.types[0] == "text/plain") {
+            event.preventDefault();
+            let listEl = this.selectedElement.querySelector("ul")!;
+            listEl.classList.add("droppable")
+        }
     }
 
     dragLeaveHandler = (event: DragEvent): void => {
@@ -233,7 +238,7 @@ class ProjectList extends Component<HTMLDivElement,HTMLElement> implements DragT
     }
 
     dropHandler = (event: DragEvent): void  =>{
-        
+        console.log(event)
     }
 
     configure() {

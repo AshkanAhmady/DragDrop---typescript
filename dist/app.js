@@ -111,7 +111,9 @@ class SingleProject extends Component {
     constructor(hostId, project) {
         super("single-project", hostId, false, project.id);
         this.dragStartHandler = (event) => {
-            console.log(event);
+            // setData(2 input)=> (1): type of data ___ (2): value of data
+            event.dataTransfer.setData("text/plain", this.project.id);
+            event.dataTransfer.effectAllowed = "move";
         };
         this.dragEndHandler = (_) => {
             console.log("dragged");
@@ -147,14 +149,18 @@ class ProjectList extends Component {
         super("project-list", "app", false, `${type}-projects`);
         this.type = type;
         this.dragOverHandler = (event) => {
-            let listEl = this.selectedElement.querySelector("ul");
-            listEl.classList.add("droppable");
+            if (event.dataTransfer && event.dataTransfer.types[0] == "text/plain") {
+                event.preventDefault();
+                let listEl = this.selectedElement.querySelector("ul");
+                listEl.classList.add("droppable");
+            }
         };
         this.dragLeaveHandler = (event) => {
             let listEl = this.selectedElement.querySelector("ul");
             listEl.classList.remove("droppable");
         };
         this.dropHandler = (event) => {
+            console.log(event);
         };
         this.assignedProjects = [];
         this.configure();
